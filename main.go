@@ -72,7 +72,11 @@ func generateTestData(db *sql.DB) error {
     if err != nil {
         return err
     }
-    defer stmt.Close()
+    defer func() {
+        if err := stmt.Close(); err != nil {
+            log.Fatal(err)
+        }
+    }()
 
     // 生成100000条订单记录
     for i := 0; i < 100000; i++ {
@@ -98,6 +102,7 @@ func generateTestData(db *sql.DB) error {
 
 // generateWeight 生成随机重量，保证计费重量的分布权重大致为 1/W
 func generateWeight() float64 {
+	// 生成一个 0~1 之间的随机数并通过倒数的方式生成重量
     r := rand.Float64()
     weight := 1 / math.Pow(r, 2)
 	// 限制最大重量为 100KG
@@ -105,7 +110,7 @@ func generateWeight() float64 {
         weight = 100
     }
 	// 保留两位小数
-    return math.Ceil(weight)
+    return math.Ceil(weight*100) / 100
 }
 
 func queryOrders(db *sql.DB, uid int) {
@@ -128,6 +133,9 @@ func queryOrders(db *sql.DB, uid int) {
 		}
 		fmt.Printf("Order ID: %d, Weight: %.2f KG, Cost: %d 元, Created At: %s\n", id, weight, cost, createdAt)
 		totalCost += cost
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
 	}
 	fmt.Printf("Total Cost: %d 元\n", totalCost)
 }

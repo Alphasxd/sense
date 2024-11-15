@@ -1,5 +1,36 @@
 # 运费清单计算和测试程序
 
+## 项目结构
+
+```
+go.mod
+go.sum
+main.go
+db/
+  database.go
+models/
+  order.go
+services/
+  shipping.go
+  data.go
+utils/
+  weight.go
+```
+## 项目编译
+
+```bash
+go build -o ship .
+```
+
+## 项目运行
+
+```bash
+./ship -generate
+./ship -query <user-id>
+```
+
+## 问题描述
+
 某快递公司在A和B城市之间的快递费用规则如下：
 
 ```
@@ -14,6 +45,14 @@
 问题2. 为上述计算函数生成对应的测试代码和测试订单数据，要求如下：
     
 1. 使用SQLite数据库存储订单数据
+    订单数据至少包含以下内容：
+    |名称|类型|说明|
+    |----|----|----|
+    |id|INTEGER INTEGER|订单 id|
+    |uid|用户 id|用户 id|
+    |weight|DOUBLE|重量(KG)|
+    |created_at|DATETIME|创建时间|
+
 2. 生成1000个用户id
 3. 生成100000条订单记录并插入到数据库中，规则如下：
     1) id 不允许重复

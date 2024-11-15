@@ -80,8 +80,14 @@ func generateTestData(db *sql.DB) error {
 
 // generateWeight 生成随机重量，保证计费重量的分布权重大致为 1/W
 func generateWeight() float64 {
-	r := rand.Float64()
-	return 1 / math.Pow(r, 2)
+    r := rand.Float64()
+    weight := 1 / math.Pow(r, 2)
+	// 限制最大重量为 100KG
+    if weight > 100 {
+        weight = 100
+    }
+	// 保留两位小数
+    return math.Ceil(weight)
 }
 
 func queryOrders(db *sql.DB, uid int) {

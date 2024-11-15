@@ -2,12 +2,11 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"fmt"
 	"log"
 	"math"
 	"math/rand"
-	"os"
-	"strconv"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -135,41 +134,31 @@ func queryOrders(db *sql.DB, uid int) {
 
 func printUsage() {
 	fmt.Println("Usage:")
-	fmt.Println("  go run main.go generate  - 生成测试数据")
-	fmt.Println("  go run main.go query <user_id>  - 查询指定用户的订单")
+	fmt.Println("  -generate  生成测试数据")
+	fmt.Println("  -query <user_id>  查询指定用户的订单")
 }
 
 func main() {
+	generateFlag := flag.Bool("generate", false, "生成测试数据")
+	queryFlag := flag.Int("query", 0, "查询指定用户的订单")
+	flag.Usage = printUsage
+	flag.Parse()
+
 	db, err := createDatabase()
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	if len(os.Args) < 2 {
-		printUsage()
-		return
-	}
-
-	command := os.Args[1]
-	switch command {
-	case "generate":
+	if *generateFlag {
 		err = generateTestData(db)
 		if err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println("Test data generated successfully.")
-	case "query":
-		if len(os.Args) < 3 {
-			printUsage()
-			return
-		}
-		uid, err := strconv.Atoi(os.Args[2])
-		if err != nil {
-			log.Fatal(err)
-		}
-		queryOrders(db, uid)
-	default:
+	} else if *queryFlag > 0 {
+		queryOrders(db, *queryFlag)
+	} else {
 		printUsage()
 	}
 }
